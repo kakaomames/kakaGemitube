@@ -14,23 +14,31 @@ cd ./invidious-companion
 git am ../patches/*.patch
 cd ..
 
-# 4. 設定ファイルの作成（英数字のみ16文字！）
-# invidious-companion フォルダの中に直接作るぞ
+
+# 4. 設定ファイルの作成（徹底的にシンプルにする！）
 SECRET="GeminiProg123456"
 cat <<EOF > invidious-companion/config.toml
 [server]
 port = 8282
 host = "127.0.0.1"
 verify_requests = false
-base_path = ""
+base_path = ""        # ここを空にする！
 secret_key = "$SECRET"
 
 [jobs.gluetun_manager]
 enabled = false
 
 [jobs.youtube_session]
-po_token_enabled = false
+po_token_enabled = false  # これをfalseに！
+po_token_check = false    # これもfalseに！
 EOF
+
+# 起動コマンド（環境変数でもPO Tokenを黙らせる）
+export JOBS_YOUTUBE_SESSION_PO_TOKEN_ENABLED=false
+export JOBS_YOUTUBE_SESSION_PO_TOKEN_CHECK=false
+
+cd invidious-companion
+deno run -A --no-lock src/main.ts --config config.toml &
 
 # 5. 起動！ (環境変数でも SECRET_KEY を念押しで流し込む)
 echo "Starting Companion Engine..."
