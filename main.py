@@ -1,42 +1,41 @@
 import subprocess
 import time
 
-def get_video_url(video_id, itag="22"):
-    # 設定した 8282 ポートを狙い撃つ
-    # local=true でプロキシURLを生成させるぞ
-    # main.py の base_api を修正
-# サーバーのログに合わせて /companion を足してみる
-    base_api2 = f"http://localhost:8282/companion/latest_version?id={video_id}&itag={itag}&local=true"
-    base_api = f"http://localhost:8282/latest_version?id={video_id}&itag={itag}&local=true"
+# Determined value: print each time
+def mission_execute(target_url):
+    print(f"Targeting: {target_url}")
     
-    # Determined value: print each time
-    print(f"Targeting Video: {video_id} (itag: {itag})")
-    
-    # 掟：html以外は絶対にcurlで実行する
-    # -w %{url_effective} でリダイレクト後の最終URLだけをスマートに取得！
+    # -i でヘッダーを確認し、-L で追いかける
+    # 最終的な有効URL（url_effective）だけを抜き出す
     cmd = [
-        "curl", "-s", "-L", "-o", "/dev/null", "-w", "%{url_effective}",
-        base_api
-    ]
-    cmd2 = [
-        "curl", "-s", "-L", "-o", "/dev/null", "-w", "%{url_effective}",
-        base_api2
+        "curl", "-s", "-L", 
+        "-o", "/dev/null", 
+        "-w", "%{url_effective}", 
+        target_url
     ]
     
-    print(f"Executing: {' '.join(cmd)}")
     result = subprocess.run(cmd, capture_output=True, text=True)
-    result2 = subprocess.run(cmd2, capture_output=True, text=True)
-    
     final_url = result.stdout.strip()
-    final_url2 = result2.stdout.strip()
-    final_urls = final_url + "と" + final_url2
     print(f"final_url:{final_url}")
-    
-    return final_urls
+    return final_url
 
 if __name__ == "__main__":
-    # テスト用の動画ID (例)
-    test_id = "dQw4w9WgXcQ"
-    url = get_video_url(test_id)
-    if url:
-        print(f"MISSION SUCCESS: {url}")
+    video_id = "dQw4w9WgXcQ" # ターゲットID
+    
+    # サーバーのログにある「正しいパス」を指定！
+    # local=true を入れることで直リンクを生成させる
+    api_path = f"http://localhost:8282/companion/latest_version?id={video_id}&itag=22&local=true"
+    
+    print("--- Mission Start ---")
+    result_url = mission_execute(api_path)
+    
+    if "videoplayback" in result_url:
+        print(f"🏆 MISSION ACCOMPLISHED! 🏆")
+        print(f"Your direct link is: {result_url}")
+    else:
+        print("🚩 Target missed. Checking raw response...")
+        # 失敗した場合は理由を探るためにヘッダーだけ表示
+        raw_check = subprocess.run(["curl", "-I", "-s", api_path], capture_output=True, text=True)
+        print(f"Raw Header:\n{raw_check.stdout}")
+
+    print("--- Mission End ---")
