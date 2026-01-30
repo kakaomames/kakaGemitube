@@ -33,19 +33,17 @@ enabled = false
 po_token_enabled = false
 EOF
 
-# 5. 起動！ディレクトリを移動してから、その場にあるconfigを指定
+# ...（前段のcloneなどは同じ）
+
+# 5. 起動！（環境変数で設定を「ねじ伏せる」！）
 cd invidious-companion/src
-export SERVER_SECRET_KEY="$SECRET"
-deno run -A --no-lock main.ts --config config.toml &
+export SERVER_SECRET_KEY="GeminiProg123456"
+export SERVER_BASE_PATH="" # これで /companion を消し去る！
+export JOBS_YOUTUBE_SESSION_PO_TOKEN_ENABLED="false" # PO Tokenを黙らせる！
 
-# 5. 起動！ (環境変数でも SECRET_KEY を念押しで流し込む)
-echo "Starting Companion Engine..."
-cd invidious-companion
+echo "Force Starting Companion..."
+deno run -A --no-lock main.ts &
 
-# 環境変数をセットして起動！
-export SERVER_SECRET_KEY="$SECRET"
-deno run -A --no-lock src/main.ts --config config.toml &
+sleep 25 # PO Token生成（の失敗）を待つ時間を長めに
+echo "Companion is awake! 🚀"
 
-# 起動待ち (Actionsのスペックを考慮)
-sleep 20
-echo "Companion is awake on port 8282! 🚀"
