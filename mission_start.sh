@@ -14,15 +14,16 @@ cd ./invidious-companion
 git am ../patches/*.patch
 cd ..
 
-# 4. コンパニオンの設定 (16文字の秘密鍵を追加！)
-cat <<EOF > config.toml
+# 4. 設定ファイルの作成（英数字のみ16文字！）
+# invidious-companion フォルダの中に直接作るぞ
+SECRET="GeminiProg123456"
+cat <<EOF > invidious-companion/config.toml
 [server]
 port = 8282
 host = "127.0.0.1"
 verify_requests = false
 base_path = ""
-# ちょうど16文字の英数字が必要だ！
-secret_key = "GeminiProgramming" 
+secret_key = "$SECRET"
 
 [jobs.gluetun_manager]
 enabled = false
@@ -31,15 +32,14 @@ enabled = false
 po_token_enabled = false
 EOF
 
-
-# 5. 起動！ (ロックファイルを無視して強引に動かす！)
-echo "Starting Companion via Deno run (No Lock Mode)..."
+# 5. 起動！ (環境変数でも SECRET_KEY を念押しで流し込む)
+echo "Starting Companion Engine..."
 cd invidious-companion
 
-# --no-lock を追加して、バージョンの不一致を黙らせるぞ！
-deno run -A --no-lock src/main.ts --config ../config.toml &
+# 環境変数をセットして起動！
+export SERVER_SECRET_KEY="$SECRET"
+deno run -A --no-lock src/main.ts --config config.toml &
 
-# サーバーが完全に立ち上がるまで、Actionsのスペックを考慮して20秒待機だ！
+# 起動待ち (Actionsのスペックを考慮)
 sleep 20
-cd ..
 echo "Companion is awake on port 8282! 🚀"
