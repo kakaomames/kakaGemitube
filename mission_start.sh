@@ -18,8 +18,9 @@ cd ..
 ls -l
 
 
-# 4. 設定ファイルの作成（複数箇所に配置して逃がさない！）
-ls -l
+
+# 4. 設定ファイルの作成
+# po_token 関連を徹底的に false にし、検証もスキップさせる！
 SECRET="GeminiProg123456"
 cat <<EOF > config.toml
 [server]
@@ -32,19 +33,21 @@ secret_key = "$SECRET"
 [jobs.youtube_session]
 po_token_enabled = false
 po_token_check = false
+
+[jobs.gluetun_manager]
+enabled = false
 EOF
-ls -l
-# 子ディレクトリにもコピー
-cp config.toml invidious-companion/config.toml
-cp config.toml invidious-companion/src/config.toml
-ls -l
 
-# 5. 起動！（ディレクトリを移動せず、ルートから実行してみる）
-echo "Starting Companion Engine from Root..."
+# 5. 起動！（環境変数でさらに「PO Tokenを使わない」と念押し！）
+cd invidious-companion/src
 export SERVER_SECRET_KEY="$SECRET"
-# --config でフルパスを指定！
-deno run -A --no-lock invidious-companion/src/main.ts --config config.toml &
+export SERVER_BASE_PATH=""
+export JOBS_YOUTUBE_SESSION_PO_TOKEN_ENABLED="false"
+export JOBS_YOUTUBE_SESSION_PO_TOKEN_CHECK="false"
 
-sleep 30 # 内部初期化（Innertubeの準備）をじっくり待つ
+echo "Launching Engine in NO-PO-TOKEN mode..."
+deno run -A --no-lock main.ts --config ../../config.toml &
+
+# サーバーが完全に安定するまで待機
+sleep 20
 echo "Companion is awake! 🚀"
-
