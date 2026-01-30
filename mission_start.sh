@@ -49,26 +49,25 @@ cp config.toml invidious-companion-patches/config/config.toml
 # 5. 起動！（--config 引数を使わず、環境変数でパスを直接教え込む！）
 echo "Starting Companion with CONFIG_PATH..."
 cd invidious-companion/src
-
 # ... (git clone 後の cd invidious-companion/src にて)
 
-# 【最優先】Gluetun(IP回転)をソースコードレベルで抹殺する！
-sed -i 's/enabled: true/enabled: false/g' lib/helpers/config.ts
+# 【最重要】設定のデフォルト値を定義しているファイルを直接書き換える
+# ターゲットファイル: lib/helpers/config.ts (または lib/config.ts 等、設定を保持しているファイル)
 
-# 他の設定も念押しで書き換え
-sed -i 's/base_path: "\/companion"/base_path: ""/g' lib/helpers/config.ts
-sed -i 's/po_token_enabled: true/po_token_enabled: false/g' lib/helpers/config.ts
+# 1. base_path を "/companion" から空にする
+sed -i 's/base_path: "\/companion"/base_path: ""/g' lib/helpers/config.ts 2>/dev/null || sed -i 's/base_path: "\/companion"/base_path: ""/g' src/lib/helpers/config.ts
 
-# 環境変数でも「これでもか！」と叩き込む
-export SERVER_SECRET_KEY="GeminiProg123456"
-export SERVER_BASE_PATH=""
-export JOBS_GLUETUN_MANAGER_ENABLED="false"
-export JOBS_YOUTUBE_SESSION_PO_TOKEN_ENABLED="false"
+# 2. po_token を強制無効化
+sed -i 's/po_token_enabled: true/po_token_enabled: false/g' lib/helpers/config.ts 2>/dev/null || sed -i 's/po_token_enabled: true/po_token_enabled: false/g' src/lib/helpers/config.ts
 
-echo "Surgery complete. Gluetun and PO-Token disabled. 🚀"
+# 3. リクエスト検証を強制無効化
+sed -i 's/verify_requests: true/verify_requests: false/g' lib/helpers/config.ts 2>/dev/null || sed -i 's/verify_requests: true/verify_requests: false/g' src/lib/helpers/config.ts
+
+# 4. Gluetunを強制無効化
+sed -i 's/enabled: true/enabled: false/g' lib/jobs/gluetun.ts 2>/dev/null
+
+echo "Surgery complete. Forcing configuration in source code. 🚀"
+
+# 起動！
 deno run -A --no-lock main.ts &
-
 sleep 30
-
-sleep 25
-echo "Companion is awake! 🚀"
