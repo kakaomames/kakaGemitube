@@ -1,0 +1,25 @@
+name: Video Extraction Mission 🚀
+on: [workflow_dispatch] # 手動でポチッと起動！
+
+jobs:
+  run-mission:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Deno 🦖
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Setup Python 🐍
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Start Companion Engine 🛠️
+        run: bash mission_start.sh
+
+      - name: Run Extraction 🎬
+        run: python main.py
