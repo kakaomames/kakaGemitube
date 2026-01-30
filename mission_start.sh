@@ -30,15 +30,14 @@ enabled = false
 po_token_enabled = false
 EOF
 
-# 5. 起動！ (コンパイルせず、Denoで直接ソースを叩く！)
-# --allow-all (-A) で権限を全開放して確実に動かすぞ
-# 引数の順番を Deno の仕様に合わせて調整した
-
-echo "Starting Companion via Deno run..."
+# 5. 起動！ (ロックファイルを無視して強引に動かす！)
+echo "Starting Companion via Deno run (No Lock Mode)..."
 cd invidious-companion
-deno run -A src/main.ts --config ../config.toml &
 
-# サーバーが完全に立ち上がるまで少し長めに待機（15秒）
-sleep 15
+# --no-lock を追加して、バージョンの不一致を黙らせるぞ！
+deno run -A --no-lock src/main.ts --config ../config.toml &
+
+# サーバーが完全に立ち上がるまで、Actionsのスペックを考慮して20秒待機だ！
+sleep 20
 cd ..
 echo "Companion is awake on port 8282! 🚀"
