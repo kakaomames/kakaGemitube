@@ -19,13 +19,14 @@ ls -l
 
 
 
-# 4. 設定ファイルの作成
-# po_token 関連を徹底的に false にし、検証もスキップさせる！
+## ... (前段は同じ)
+
+# 4. 設定ファイルの作成（全ディレクトリにバラ撒く！）
 SECRET="GeminiProg123456"
 cat <<EOF > config.toml
 [server]
 port = 8282
-host = "0.0.0.0"
+host = "127.0.0.1"
 verify_requests = false
 base_path = ""
 secret_key = "$SECRET"
@@ -38,16 +39,25 @@ po_token_check = false
 enabled = false
 EOF
 
-# 5. 起動！（環境変数でさらに「PO Tokenを使わない」と念押し！）
+# 読み込みエラーを避けるため、考えられるすべての場所にコピーだ！
+cp config.toml invidious-companion/config.toml
+cp config.toml invidious-companion/src/config.toml
+cp config.toml invidious-companion-patches/config.toml
+cp config.toml invidious-companion/config/config.toml
+cp config.toml invidious-companion-patches/config/config.toml
+
+# 5. 起動！（--config 引数を使わず、環境変数でパスを直接教え込む！）
+echo "Starting Companion with CONFIG_PATH..."
 cd invidious-companion/src
+
+# Deno版が参照する可能性のある環境変数もセット
+export CONFIG_PATH="../../config.toml"
 export SERVER_SECRET_KEY="$SECRET"
 export SERVER_BASE_PATH=""
-export JOBS_YOUTUBE_SESSION_PO_TOKEN_ENABLED="false"
-export JOBS_YOUTUBE_SESSION_PO_TOKEN_CHECK="false"
 
-echo "Launching Engine in NO-PO-TOKEN mode..."
-deno run -A --no-lock main.ts --config ../../config.toml &
+# 直接 main.ts を叩く！
+deno run -A --no-lock main.ts &
 
-# サーバーが完全に安定するまで待機
-sleep 20
+sleep 25
 echo "Companion is awake! 🚀"
+
