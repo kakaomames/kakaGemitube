@@ -11,11 +11,15 @@ cd invidious-companion-patches
 
 # 3. 秘伝のパッチ適用
 cd ./invidious-companion
+ls -l
 git am ../patches/*.patch
+ls -l
 cd ..
+ls -l
 
 
 # 4. 設定ファイルの作成（複数箇所に配置して逃がさない！）
+ls -l
 SECRET="GeminiProg123456"
 cat <<EOF > config.toml
 [server]
@@ -29,10 +33,11 @@ secret_key = "$SECRET"
 po_token_enabled = false
 po_token_check = false
 EOF
-
+ls -l
 # 子ディレクトリにもコピー
 cp config.toml invidious-companion/config.toml
 cp config.toml invidious-companion/src/config.toml
+ls -l
 
 # 5. 起動！（ディレクトリを移動せず、ルートから実行してみる）
 echo "Starting Companion Engine from Root..."
