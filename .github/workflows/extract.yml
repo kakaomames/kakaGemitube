@@ -1,7 +1,6 @@
 name: Video Extraction Mission 🚀
 on:
-  workflow_dispatch # 手動でポチッと起動！
-  push: [main]
+  workflow_dispatch  #push: [main]
 
 jobs:
   run-mission:
