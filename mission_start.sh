@@ -56,8 +56,28 @@ export SERVER_SECRET_KEY="$SECRET"
 export SERVER_BASE_PATH=""
 
 # 直接 main.ts を叩く！
+# deno run -A --no-lock main.ts &
+
+# sleep 25
+# echo "Companion is awake! 🚀"
+
+# ... (clone後のディレクトリ移動)
+cd invidious-companion/src
+
+# 1. ソースコードのデフォルト設定を強制書き換え（外科手術！）
+# base_path を "/companion" から "" に
+sed -i 's/base_path: "\/companion"/base_path: ""/g' lib/helpers/config.ts
+# po_token_enabled を true から false に
+sed -i 's/po_token_enabled: true/po_token_enabled: false/g' lib/helpers/config.ts
+
+# 2. 環境変数でも念押し（バックアップ）
+export SERVER_SECRET_KEY="GeminiProg123456"
+export SERVER_BASE_PATH=""
+export JOBS_YOUTUBE_SESSION_PO_TOKEN_ENABLED="false"
+
+# 3. 起動！
+echo "Surgery complete. Launching Engine..."
 deno run -A --no-lock main.ts &
 
 sleep 25
 echo "Companion is awake! 🚀"
-
