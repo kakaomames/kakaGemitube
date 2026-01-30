@@ -30,9 +30,15 @@ enabled = false
 po_token_enabled = false
 EOF
 
-# 5. 起動！ (Deno環境が必要)
-bash compile.sh
-./invidious-companion --config config.toml &
+# 5. 起動！ (コンパイルせず、Denoで直接ソースを叩く！)
+# --allow-all (-A) で権限を全開放して確実に動かすぞ
+# 引数の順番を Deno の仕様に合わせて調整した
 
+echo "Starting Companion via Deno run..."
+cd invidious-companion
+deno run -A src/main.ts --config ../config.toml &
+
+# サーバーが完全に立ち上がるまで少し長めに待機（15秒）
+sleep 15
+cd ..
 echo "Companion is awake on port 8282! 🚀"
-sleep 10 # 起動完了まで少し待機
