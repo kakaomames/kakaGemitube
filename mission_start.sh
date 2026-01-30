@@ -50,34 +50,25 @@ cp config.toml invidious-companion-patches/config/config.toml
 echo "Starting Companion with CONFIG_PATH..."
 cd invidious-companion/src
 
-# Deno版が参照する可能性のある環境変数もセット
-export CONFIG_PATH="../../config.toml"
-export SERVER_SECRET_KEY="$SECRET"
-export SERVER_BASE_PATH=""
+# ... (git clone 後の cd invidious-companion/src にて)
 
-# 直接 main.ts を叩く！
-# deno run -A --no-lock main.ts &
+# 【最優先】Gluetun(IP回転)をソースコードレベルで抹殺する！
+sed -i 's/enabled: true/enabled: false/g' lib/helpers/config.ts
 
-# sleep 25
-# echo "Companion is awake! 🚀"
-
-# ... (clone後のディレクトリ移動)
-cd invidious-companion/src
-
-# 1. ソースコードのデフォルト設定を強制書き換え（外科手術！）
-# base_path を "/companion" から "" に
+# 他の設定も念押しで書き換え
 sed -i 's/base_path: "\/companion"/base_path: ""/g' lib/helpers/config.ts
-# po_token_enabled を true から false に
 sed -i 's/po_token_enabled: true/po_token_enabled: false/g' lib/helpers/config.ts
 
-# 2. 環境変数でも念押し（バックアップ）
+# 環境変数でも「これでもか！」と叩き込む
 export SERVER_SECRET_KEY="GeminiProg123456"
 export SERVER_BASE_PATH=""
+export JOBS_GLUETUN_MANAGER_ENABLED="false"
 export JOBS_YOUTUBE_SESSION_PO_TOKEN_ENABLED="false"
 
-# 3. 起動！
-echo "Surgery complete. Launching Engine..."
+echo "Surgery complete. Gluetun and PO-Token disabled. 🚀"
 deno run -A --no-lock main.ts &
+
+sleep 30
 
 sleep 25
 echo "Companion is awake! 🚀"
