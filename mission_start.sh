@@ -14,14 +14,15 @@ cd ./invidious-companion
 git am ../patches/*.patch
 cd ..
 
-# 4. コンパニオンの設定 (検証をオフにして扱いやすくする)
-# config.example.toml を元に、必要な部分だけ書き換える
+# 4. コンパニオンの設定 (16文字の秘密鍵を追加！)
 cat <<EOF > config.toml
 [server]
 port = 8282
 host = "127.0.0.1"
 verify_requests = false
 base_path = ""
+# ちょうど16文字の英数字が必要だ！
+secret_key = "GeminiProgramming" 
 
 [jobs.gluetun_manager]
 enabled = false
@@ -29,6 +30,7 @@ enabled = false
 [jobs.youtube_session]
 po_token_enabled = false
 EOF
+
 
 # 5. 起動！ (ロックファイルを無視して強引に動かす！)
 echo "Starting Companion via Deno run (No Lock Mode)..."
