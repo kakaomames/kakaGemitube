@@ -15,35 +15,31 @@ git am ../patches/*.patch
 cd ..
 
 
-# 4. 設定ファイルの作成（invidious-companionの中に直接作る）
+# 4. 設定ファイルの作成（複数箇所に配置して逃がさない！）
 SECRET="GeminiProg123456"
-# 確実に読み込ませるため、srcがある階層に置く
-cat <<EOF > invidious-companion/src/config.toml
+cat <<EOF > config.toml
 [server]
 port = 8282
-host = "127.0.0.1"
+host = "0.0.0.0"
 verify_requests = false
 base_path = ""
 secret_key = "$SECRET"
 
-[jobs.gluetun_manager]
-enabled = false
-
 [jobs.youtube_session]
 po_token_enabled = false
+po_token_check = false
 EOF
 
-# ...（前段のcloneなどは同じ）
+# 子ディレクトリにもコピー
+cp config.toml invidious-companion/config.toml
+cp config.toml invidious-companion/src/config.toml
 
-# 5. 起動！（環境変数で設定を「ねじ伏せる」！）
-cd invidious-companion/src
-export SERVER_SECRET_KEY="GeminiProg123456"
-export SERVER_BASE_PATH="" # これで /companion を消し去る！
-export JOBS_YOUTUBE_SESSION_PO_TOKEN_ENABLED="false" # PO Tokenを黙らせる！
+# 5. 起動！（ディレクトリを移動せず、ルートから実行してみる）
+echo "Starting Companion Engine from Root..."
+export SERVER_SECRET_KEY="$SECRET"
+# --config でフルパスを指定！
+deno run -A --no-lock invidious-companion/src/main.ts --config config.toml &
 
-echo "Force Starting Companion..."
-deno run -A --no-lock main.ts &
-
-sleep 25 # PO Token生成（の失敗）を待つ時間を長めに
+sleep 30 # 内部初期化（Innertubeの準備）をじっくり待つ
 echo "Companion is awake! 🚀"
 
